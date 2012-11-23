@@ -15,7 +15,6 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
-import android.widget.ImageView;
 
 public class DrawView extends Activity implements OnTouchListener {
 
@@ -40,6 +39,8 @@ public class DrawView extends Activity implements OnTouchListener {
     
     private Paint MyVewPaint = new Paint();
     private String TAG = "Touch";
+    
+    private boolean clickFlag = false;
     
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -77,12 +78,14 @@ public class DrawView extends Activity implements OnTouchListener {
             savedMatrix.set(matrix);
             prev.set(event.getX(), event.getY());
             mode = DRAG;
-            Log.d(TAG, "### ACTION_DOWN");
+            clickFlag = true;
+            //Log.d(TAG, "### ACTION_DOWN");
             break;
         // 副点按下
         case MotionEvent.ACTION_POINTER_DOWN:
             dist = spacing(event);
             // 如果连续两点距离大于10，则判定为多点模式
+            clickFlag = false;
             if (spacing(event) > 10f) {
                 savedMatrix.set(matrix);
                 midPoint(mid, event);
@@ -92,7 +95,8 @@ public class DrawView extends Activity implements OnTouchListener {
             break;
         case MotionEvent.ACTION_UP:
         case MotionEvent.ACTION_POINTER_UP:
-        	if(mode != DRAG) {
+        	if(clickFlag) {
+        		clickFlag = false;
             	MyView myView = new MyView(MyVewPaint, new Rect((int)event.getX() -  50/2, (int)event.getY() - 50/2 , (int)event.getX() +  50/2,  (int)event.getY() + 50/2));
             	imgView.addPoint(myView);
             	Log.d(TAG, "### add point");
@@ -103,7 +107,12 @@ public class DrawView extends Activity implements OnTouchListener {
         case MotionEvent.ACTION_MOVE:
             if (mode == DRAG) {
                 matrix.set(savedMatrix);
-                matrix.postTranslate(event.getX() - prev.x, event.getY() - prev.y);
+                float distan = (event.getX() - prev.x);
+                if(Math.abs(distan)>5f){
+                	clickFlag = false;
+                	matrix.postTranslate(event.getX() - prev.x, event.getY() - prev.y);
+                	Log.d(TAG, "### ACTION_MOVE  drag");
+                }
             } else if (mode == ZOOM) {
                 float newDist = spacing(event);
                 if (newDist > 10f) {
@@ -111,8 +120,9 @@ public class DrawView extends Activity implements OnTouchListener {
                     float tScale = newDist / dist;
                     matrix.postScale(tScale, tScale, mid.x, mid.y);
                 }
+                Log.d(TAG, "### ACTION_MOVE  zoom");
             }
-            Log.d(TAG, "### ACTION_MOVE");
+            Log.d(TAG, "### ACTION_MOVE  ============");
             break;
         }
         imgView.setImageMatrix(matrix);
