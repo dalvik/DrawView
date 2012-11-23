@@ -6,6 +6,7 @@ import java.util.List;
 import android.R.color;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -30,7 +31,7 @@ public class BackGroundVeiw extends ImageView {
 	
 	private Paint viewPathPaint = new Paint();
 	
-	private Bitmap bg = null;//Bitmap.createBitmap(1000, 800, Config.RGB_565);
+	private Bitmap bg = null;//
 	
 	private int dx = 0;;
 	
@@ -56,7 +57,8 @@ public class BackGroundVeiw extends ImageView {
 
 
 	private void initGesture() {
-		bg = BitmapFactory.decodeFile("/mnt/sdcard/IPED/Image/20120929150149.jpg");
+		bg = BitmapFactory.decodeResource(getResources(), R.drawable.bg);
+		System.out.println(bg.getWidth());
 		paint = new Paint();
 		paint.setColor(color.white);
 		viewPathPaint.setColor(Color.BLUE);
@@ -67,7 +69,6 @@ public class BackGroundVeiw extends ImageView {
 	@Override
 	protected void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
-		//canvas.drawBitmap(bg, 0,0, null);
 		int length = pointList.size();
 		for(int i=0; i<length; i++) {
 			MyView myView = pointList.get(i);

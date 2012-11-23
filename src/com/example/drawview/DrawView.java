@@ -6,7 +6,6 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PointF;
-import android.graphics.Rect;
 import android.graphics.RectF;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
@@ -170,11 +169,12 @@ public class DrawView extends Activity implements OnTouchListener {
      * 最小缩放比例，最大为100%
      */
     private void minZoom() {
-        minScaleR = Math.min((float) dm.widthPixels / (float) bitmap.getWidth(), (float) dm.heightPixels / (float) bitmap.getHeight());
+        //minScaleR = Math.min((float) dm.widthPixels / (float) bitmap.getWidth(), (float) dm.heightPixels / (float) bitmap.getHeight());
+    	minScaleR = (float) dm.widthPixels / (float) bitmap.getWidth();
         Log.d(TAG, "### minScaleR = " + minScaleR);
-        //if (minScaleR < 1.0) {
+        if (minScaleR < 1.0) {
             matrix.postScale(minScaleR, minScaleR);
-        //}
+        }
     }
 
     private void center() {
