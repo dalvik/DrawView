@@ -36,6 +36,17 @@ public class DrawView extends Activity implements OnTouchListener {
     PointF mid = new PointF();
     float dist = 1f;
 
+    private int rectWidth = 50;
+    
+    private int rectHeight = 50;
+    
+    private int dw = 50;
+    
+    private int dh = 50;
+    
+    private int save_dw = 0;
+    
+    private int save_dh = 0;
     
     private Paint MyVewPaint = new Paint();
     private String TAG = "Touch";
@@ -62,11 +73,6 @@ public class DrawView extends Activity implements OnTouchListener {
         imgView.setImageMatrix(matrix);
     }
 
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-    	Log.d(TAG, " onclock  ");
-    	return super.onTouchEvent(event);
-    }
     /**
      * 触屏监听
      */
@@ -79,6 +85,8 @@ public class DrawView extends Activity implements OnTouchListener {
             prev.set(event.getX(), event.getY());
             mode = DRAG;
             clickFlag = true;
+            save_dw = dw;
+            save_dh = dh;
             //Log.d(TAG, "### ACTION_DOWN");
             break;
         // 副点按下
@@ -88,6 +96,8 @@ public class DrawView extends Activity implements OnTouchListener {
             clickFlag = false;
             if (spacing(event) > 10f) {
                 savedMatrix.set(matrix);
+                save_dw = dw;
+                save_dh = dh;
                 midPoint(mid, event);
                 mode = ZOOM;
             }
@@ -97,7 +107,7 @@ public class DrawView extends Activity implements OnTouchListener {
         case MotionEvent.ACTION_POINTER_UP:
         	if(clickFlag) {
         		clickFlag = false;
-            	MyView myView = new MyView(MyVewPaint, new Rect((int)event.getX() -  50/2, (int)event.getY() - 50/2 , (int)event.getX() +  50/2,  (int)event.getY() + 50/2));
+            	MyView myView = new MyView(MyVewPaint, (int)(event.getX()- dw/2), (int)(event.getY() - dh/2) , dw,  dh);
             	imgView.addPoint(myView);
             	Log.d(TAG, "### add point");
             }
@@ -107,22 +117,26 @@ public class DrawView extends Activity implements OnTouchListener {
         case MotionEvent.ACTION_MOVE:
             if (mode == DRAG) {
                 matrix.set(savedMatrix);
-                float distan = (event.getX() - prev.x);
-                if(Math.abs(distan)>5f){
+                float dx = (event.getX() - prev.x);
+                if(Math.abs(dx)>5f){
                 	clickFlag = false;
-                	matrix.postTranslate(event.getX() - prev.x, event.getY() - prev.y);
-                	Log.d(TAG, "### ACTION_MOVE  drag");
+                	float dy = event.getY() - prev.y;
+                	imgView.setXY((int)dx, (int)dy);
+                	matrix.postTranslate(dx, dy);
+                	Log.d(TAG, "### ACTION_MOVE  drag === " + dx  +  "  "+ dy);
                 }
             } else if (mode == ZOOM) {
                 float newDist = spacing(event);
                 if (newDist > 10f) {
                     matrix.set(savedMatrix);
                     float tScale = newDist / dist;
+                    dw = (int)(tScale* save_dw);
+                    dh = (int)(tScale *save_dh);
+                    imgView.scale(dw, dh);
+                    Log.d(TAG, "### ACTION_MOVE  zoom tScale = "+ tScale);
                     matrix.postScale(tScale, tScale, mid.x, mid.y);
                 }
-                Log.d(TAG, "### ACTION_MOVE  zoom");
             }
-            Log.d(TAG, "### ACTION_MOVE  ============");
             break;
         }
         imgView.setImageMatrix(matrix);
@@ -139,11 +153,16 @@ public class DrawView extends Activity implements OnTouchListener {
         if (mode == ZOOM) {
             if (p[0] < minScaleR) {
                 matrix.setScale(minScaleR, minScaleR);
+                imgView.scale(rectWidth, rectHeight);
+                Log.d(TAG, "###  CheckView ZOOM = " + minScaleR + " dw = " + dw);
             }
             if (p[0] > MAX_SCALE) {
+            	imgView.scale(save_dw, save_dh);
                 matrix.set(savedMatrix);
+                Log.d(TAG, "###  CheckView MAX_SCALE = " + MAX_SCALE);
             }
         }
+        Log.d(TAG, "### CheckView =" + p[0]);
         center();
     }
 
@@ -152,9 +171,10 @@ public class DrawView extends Activity implements OnTouchListener {
      */
     private void minZoom() {
         minScaleR = Math.min((float) dm.widthPixels / (float) bitmap.getWidth(), (float) dm.heightPixels / (float) bitmap.getHeight());
-        if (minScaleR < 1.0) {
+        Log.d(TAG, "### minScaleR = " + minScaleR);
+        //if (minScaleR < 1.0) {
             matrix.postScale(minScaleR, minScaleR);
-        }
+        //}
     }
 
     private void center() {
@@ -184,7 +204,7 @@ public class DrawView extends Activity implements OnTouchListener {
             } else if (rect.top > 0) {
                 deltaY = -rect.top;
             } else if (rect.bottom < screenHeight) {
-                deltaY = imgView.getHeight() - rect.bottom;
+                deltaY = screenHeight - rect.bottom;
             }
         }
 
@@ -197,6 +217,10 @@ public class DrawView extends Activity implements OnTouchListener {
             } else if (rect.right < screenWidth) {
                 deltaX = screenWidth - rect.right;
             }
+        }
+        Log.d(TAG, "### deltaX = "+ deltaX + " delayY = " + deltaY);
+        if(deltaX != 0 && deltaY != 0) {
+        	imgView.setXY((int)-deltaX, (int)-deltaY);
         }
         matrix.postTranslate(deltaX, deltaY);
     }

@@ -1,17 +1,25 @@
 package com.example.drawview;
 
 import android.graphics.Paint;
-import android.graphics.Rect;
 
 public class MyView  {
 
 	public Paint paint = null;
 	
-	public Rect rect  = null;
+	public int left;
 	
-	public MyView(Paint paint, Rect rect) {
+	public int top;
+	
+	public int width;
+	
+	public int height;
+	
+	public MyView(Paint paint, int left, int top, int width, int height) {
 		this.paint = paint;
-		this.rect = rect;
+		this.left = left;
+		this.top = top;
+		this.width = width;
+		this.height = height;
 	}
 	
 	

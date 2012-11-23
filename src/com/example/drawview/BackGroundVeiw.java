@@ -10,6 +10,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.widget.ImageView;
 
@@ -30,6 +31,10 @@ public class BackGroundVeiw extends ImageView {
 	private Paint viewPathPaint = new Paint();
 	
 	private Bitmap bg = null;//Bitmap.createBitmap(1000, 800, Config.RGB_565);
+	
+	private int dx = 0;;
+	
+	private int dy = 0;
 	
 	public BackGroundVeiw(Context context) {
 		super(context);
@@ -66,13 +71,18 @@ public class BackGroundVeiw extends ImageView {
 		int length = pointList.size();
 		for(int i=0; i<length; i++) {
 			MyView myView = pointList.get(i);
-			canvas.drawRect(myView.rect, myView.paint);
+			int left = dx + myView.left;
+			int top = dy + myView.top;
+			int right = left + myView.width;
+			int bottom = top + myView.height;
+			Rect rectTmp = new Rect(left, top, right, bottom);
+			canvas.drawRect(rectTmp, myView.paint);
 		}
 		
 		int pathLength = pathList.size();
 		for(int i=0; i<pathLength; i++) {
 			ViewPath  viewPath = pathList.get(i);
-			canvas.drawLine(viewPath.startX, viewPath.startY, viewPath.stopX, viewPath.stopY, viewPath.paint);
+			canvas.drawLine(dx + viewPath.startX, dy + viewPath.startY, dx + viewPath.stopX, dy + viewPath.stopY, viewPath.paint);
 		}
 	}
 	
@@ -85,10 +95,46 @@ public class BackGroundVeiw extends ImageView {
 		int length = pointList.size();
 		if(length>0) {
 			MyView myViewTemp = pointList.get(length-1);
-			ViewPath viewPath = new ViewPath(myViewTemp.rect.centerX(), myViewTemp.rect.centerY(), myView.rect.centerX(), myView.rect.centerY(), viewPathPaint);
+			int startX = myViewTemp.left + myView.width/2;
+			int startY = myViewTemp.top + myViewTemp.height/2;
+			int endX = myView.left + myView.width/2;
+			int endY = myView.top + myViewTemp.height/2;
+			
+			ViewPath viewPath = new ViewPath(startX, startY, endX, endY, viewPathPaint);
 			pathList.add(viewPath);
 		}
 		pointList.add(myView);
 		invalidate();
+	}
+	
+	public void setXY(int dx, int dy) {
+		this.dx = dx;
+		this.dy = dy;
+		invalidate();
+	}
+	
+	public void scale(int dw, int dh) {
+		int length = pointList.size();
+		pathList.clear();
+		for(int i=0;i<length;i++) {
+			MyView myView = pointList.get(i);
+			int deltaL = dw - myView.width;
+			int deltalT = dh - myView.height;
+			myView.width = dw;
+			myView.height = dh;
+			myView.left -=deltaL/2;
+			myView.top -= deltalT/2;
+			pointList.remove(i);
+			pointList.add(i, myView);
+			if(i>0) {
+				MyView myViewTemp = pointList.get(i-1);
+				int startX = myViewTemp.left + myViewTemp.width/2;
+				int startY = myViewTemp.top + myViewTemp.height/2;
+				int endX = myView.left + myView.width/2;
+				int endY = myView.top + myView.height/2;
+				ViewPath viewPath = new ViewPath(startX, startY, endX, endY, viewPathPaint);
+				pathList.add(viewPath);
+			}
+		}
 	}
 }
