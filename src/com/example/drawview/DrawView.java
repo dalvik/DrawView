@@ -47,6 +47,14 @@ public class DrawView extends Activity implements OnTouchListener {
     
     private int save_dh = 0;
     
+    private int x = 0;
+    
+    private int y = 0;
+    
+    private int lastX = 0;
+    
+    private int lastY = 0;
+    
     private Paint MyVewPaint = new Paint();
     private String TAG = "Touch";
     
@@ -59,8 +67,6 @@ public class DrawView extends Activity implements OnTouchListener {
 
 		MyVewPaint.setColor(Color.RED);
         imgView = (BackGroundVeiw) findViewById(R.id.imag);// 获取控件
-        //bitmap = BitmapFactory.decodeResource(getResources(), this.getIntent().getExtras().getInt("IMG"));// 获取图片资源
-        //bitmap = BitmapFactory.decodeFile("/mnt/sdcard/IPED/Image/20120929150149.jpg");
         bitmap = imgView.getBitmap();
         imgView.setImageBitmap(bitmap);// 填充控件
         
@@ -86,6 +92,11 @@ public class DrawView extends Activity implements OnTouchListener {
             clickFlag = true;
             save_dw = dw;
             save_dh = dh;
+            x = 0;
+            y = 0;
+            lastX = imgView.getX();
+            lastY = imgView.getY();
+            System.out.println(lastX + " -----  " + lastY);
             //Log.d(TAG, "### ACTION_DOWN");
             break;
         // 副点按下
@@ -100,7 +111,6 @@ public class DrawView extends Activity implements OnTouchListener {
                 midPoint(mid, event);
                 mode = ZOOM;
             }
-            Log.d(TAG, "### ACTION_POINTER_DOWN");
             break;
         case MotionEvent.ACTION_UP:
         case MotionEvent.ACTION_POINTER_UP:
@@ -108,10 +118,8 @@ public class DrawView extends Activity implements OnTouchListener {
         		clickFlag = false;
             	MyView myView = new MyView(MyVewPaint, (int)(event.getX()- dw/2), (int)(event.getY() - dh/2) , dw,  dh);
             	imgView.addPoint(myView);
-            	Log.d(TAG, "### add point");
             }
             mode = NONE;
-            Log.d(TAG, "### ACTION_UP");
             break;
         case MotionEvent.ACTION_MOVE:
             if (mode == DRAG) {
@@ -120,7 +128,11 @@ public class DrawView extends Activity implements OnTouchListener {
                 if(Math.abs(dx)>5f){
                 	clickFlag = false;
                 	float dy = event.getY() - prev.y;
-                	imgView.setXY((int)dx, (int)dy);
+                	//if(dragFlag) {
+                		x = (int) dx;
+                		y = (int) dy;
+                		imgView.setXY(x + lastX, y + lastY);
+                	//}
                 	matrix.postTranslate(dx, dy);
                 	Log.d(TAG, "### ACTION_MOVE  drag === " + dx  +  "  "+ dy);
                 }
@@ -139,7 +151,7 @@ public class DrawView extends Activity implements OnTouchListener {
             break;
         }
         imgView.setImageMatrix(matrix);
-        CheckView();
+        //CheckView();
         return true;
     }
 
@@ -161,8 +173,8 @@ public class DrawView extends Activity implements OnTouchListener {
                 Log.d(TAG, "###  CheckView MAX_SCALE = " + MAX_SCALE);
             }
         }
-        Log.d(TAG, "### CheckView =" + p[0]);
-        center();
+        //Log.d(TAG, "### CheckView =" + p[0]);
+       // center();
     }
 
     /**
@@ -199,7 +211,7 @@ public class DrawView extends Activity implements OnTouchListener {
         if (vertical) {
             // 图片小于屏幕大小，则居中显示。大于屏幕，上方留空则往上移，下方留空则往下移
             int screenHeight = dm.heightPixels;
-            if (height < screenHeight) {
+            if (height <= screenHeight) {
                 deltaY = (screenHeight - height) / 2 - rect.top;
             } else if (rect.top > 0) {
                 deltaY = -rect.top;
@@ -210,7 +222,7 @@ public class DrawView extends Activity implements OnTouchListener {
 
         if (horizontal) {
             int screenWidth = dm.widthPixels;
-            if (width < screenWidth) {
+            if (width <= screenWidth) {
                 deltaX = (screenWidth - width) / 2 - rect.left;
             } else if (rect.left > 0) {
                 deltaX = -rect.left;
@@ -218,10 +230,16 @@ public class DrawView extends Activity implements OnTouchListener {
                 deltaX = screenWidth - rect.right;
             }
         }
-        Log.d(TAG, "### deltaX = "+ deltaX + " delayY = " + deltaY);
-        if(deltaX != 0 && deltaY != 0) {
+        Log.d(TAG, "### deltaX = "+ deltaX + " delayY = " + deltaY + " lastX = " + lastX + " lastY = " + lastY  + " x = " + x +  " y = "+ y);
+        if(deltaX == 0f && deltaY == 0f) {
+        	//imgView.setXY((int)-deltaX, (int)-deltaY);
+        	//imgView.setXY(lastX - x, lastY - y);
+        }/*else{
+        	imgView.setXY(-x + lastX, -y + lastY);
+        }*/
+        /*if(!dragFlag) {
         	imgView.setXY((int)-deltaX, (int)-deltaY);
-        }
+        }*/
         matrix.postTranslate(deltaX, deltaY);
     }
 

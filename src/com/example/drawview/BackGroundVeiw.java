@@ -57,7 +57,9 @@ public class BackGroundVeiw extends ImageView {
 
 
 	private void initGesture() {
-		bg = BitmapFactory.decodeResource(getResources(), R.drawable.bg);
+		//bg = BitmapFactory.decodeResource(getResources(), R.drawable.bg);
+		//bg = BitmapFactory.decodeFile("/mnt/sdcard/IPED/Image/20120929150149.jpg");
+		bg = BitmapFactory.decodeResource(getResources(), R.drawable._birds_24);
 		System.out.println(bg.getWidth());
 		paint = new Paint();
 		paint.setColor(color.white);
@@ -137,5 +139,13 @@ public class BackGroundVeiw extends ImageView {
 				pathList.add(viewPath);
 			}
 		}
+	}
+	
+	public int getX() {
+		return dx;
+	}
+	
+	public int getY() {
+		return dy;
 	}
 }
