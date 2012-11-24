@@ -2,6 +2,7 @@ package com.example.drawview;
 
 import android.app.Activity;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
@@ -108,7 +109,8 @@ public class DrawView extends Activity implements OnTouchListener {
         case MotionEvent.ACTION_POINTER_UP:
         	if(clickFlag) {
         		clickFlag = false;
-            	MyView myView = new MyView(MyVewPaint, (int)(event.getX()- bw/2), (int)(event.getY() - bh/2) , bw,  bh);
+        		Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher);
+            	MyView myView = new MyView(MyVewPaint, (int)(event.getX()- bw/2), (int)(event.getY() - bh/2) , bw,  bh, bitmap);
             	imgView.addPoint(myView);
             }
             mode = NONE;

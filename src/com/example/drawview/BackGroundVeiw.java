@@ -57,10 +57,8 @@ public class BackGroundVeiw extends ImageView {
 
 
 	private void initGesture() {
-		//bg = BitmapFactory.decodeResource(getResources(), R.drawable.bg);
-		//bg = BitmapFactory.decodeFile("/mnt/sdcard/IPED/Image/20120929150149.jpg");
-		bg = BitmapFactory.decodeResource(getResources(), R.drawable._birds_24);
-		System.out.println(bg.getWidth());
+		bg = BitmapFactory.decodeResource(getResources(), R.drawable.bg);
+		//bg = BitmapFactory.decodeResource(getResources(), R.drawable._birds_24);
 		paint = new Paint();
 		paint.setColor(color.white);
 		viewPathPaint.setColor(Color.BLUE);
@@ -79,7 +77,12 @@ public class BackGroundVeiw extends ImageView {
 			int right = left + myView.width;
 			int bottom = top + myView.height;
 			Rect rectTmp = new Rect(left, top, right, bottom);
-			canvas.drawRect(rectTmp, myView.paint);
+			Bitmap tmp = myView.bitmap;
+			if(null == tmp){
+				canvas.drawRect(rectTmp, myView.paint);
+			} else {
+				canvas.drawBitmap(tmp, null, rectTmp, myView.paint);
+			}
 		}
 		
 		int pathLength = pathList.size();
@@ -94,7 +97,6 @@ public class BackGroundVeiw extends ImageView {
 	}
 	
 	public void addPoint(MyView myView) {
-		//MyView myView = new MyView(MyVewPaint, new Rect((int)event.getX() -  rectWidth/2, (int)event.getY() - rectHeight/2 , (int)event.getX() +  rectWidth/2,  (int)event.getY() + rectHeight/2));
 		int length = pointList.size();
 		if(length>0) {
 			MyView myViewTemp = pointList.get(length-1);

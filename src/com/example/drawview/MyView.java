@@ -1,5 +1,6 @@
 package com.example.drawview;
 
+import android.graphics.Bitmap;
 import android.graphics.Paint;
 
 public class MyView  {
@@ -14,12 +15,15 @@ public class MyView  {
 	
 	public int height;
 	
-	public MyView(Paint paint, int left, int top, int width, int height) {
+	public Bitmap bitmap;
+	
+	public MyView(Paint paint, int left, int top, int width, int height, Bitmap bitmap) {
 		this.paint = paint;
 		this.left = left;
 		this.top = top;
 		this.width = width;
 		this.height = height;
+		this.bitmap = bitmap;
 	}
 	
 	
