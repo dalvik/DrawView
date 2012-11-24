@@ -35,13 +35,9 @@ public class DrawView extends Activity implements OnTouchListener {
     PointF mid = new PointF();
     float dist = 1f;
 
-    private int rectWidth = 50;
+    private int bw = 50;
     
-    private int rectHeight = 50;
-    
-    private int dw = 50;
-    
-    private int dh = 50;
+    private int bh = 50;
     
     private int save_dw = 0;
     
@@ -90,24 +86,20 @@ public class DrawView extends Activity implements OnTouchListener {
             prev.set(event.getX(), event.getY());
             mode = DRAG;
             clickFlag = true;
-            save_dw = dw;
-            save_dh = dh;
+            save_dw = bw;
+            save_dh = bh;
             x = 0;
             y = 0;
             lastX = imgView.getX();
             lastY = imgView.getY();
-            System.out.println(lastX + " -----  " + lastY);
-            //Log.d(TAG, "### ACTION_DOWN");
             break;
-        // 副点按下
         case MotionEvent.ACTION_POINTER_DOWN:
             dist = spacing(event);
-            // 如果连续两点距离大于10，则判定为多点模式
             clickFlag = false;
             if (spacing(event) > 10f) {
                 savedMatrix.set(matrix);
-                save_dw = dw;
-                save_dh = dh;
+                save_dw = bw;
+                save_dh = bh;
                 midPoint(mid, event);
                 mode = ZOOM;
             }
@@ -116,7 +108,7 @@ public class DrawView extends Activity implements OnTouchListener {
         case MotionEvent.ACTION_POINTER_UP:
         	if(clickFlag) {
         		clickFlag = false;
-            	MyView myView = new MyView(MyVewPaint, (int)(event.getX()- dw/2), (int)(event.getY() - dh/2) , dw,  dh);
+            	MyView myView = new MyView(MyVewPaint, (int)(event.getX()- bw/2), (int)(event.getY() - bh/2) , bw,  bh);
             	imgView.addPoint(myView);
             }
             mode = NONE;
@@ -128,61 +120,34 @@ public class DrawView extends Activity implements OnTouchListener {
                 if(Math.abs(dx)>5f){
                 	clickFlag = false;
                 	float dy = event.getY() - prev.y;
-                	//if(dragFlag) {
-                		x = (int) dx;
-                		y = (int) dy;
-                		imgView.setXY(x + lastX, y + lastY);
-                	//}
+            		x = (int) dx;
+            		y = (int) dy;
+            		imgView.setXY(x + lastX, y + lastY);
                 	matrix.postTranslate(dx, dy);
-                	Log.d(TAG, "### ACTION_MOVE  drag === " + dx  +  "  "+ dy);
                 }
             } else if (mode == ZOOM) {
                 float newDist = spacing(event);
                 if (newDist > 10f) {
                     matrix.set(savedMatrix);
                     float tScale = newDist / dist;
-                    dw = (int)(tScale* save_dw);
-                    dh = (int)(tScale *save_dh);
-                    imgView.scale(dw, dh);
-                    Log.d(TAG, "### ACTION_MOVE  zoom tScale = "+ tScale);
+                    bw = (int)(tScale* save_dw);
+                    bh = (int)(tScale *save_dh);
+                    imgView.scale(bw, bh);
                     matrix.postScale(tScale, tScale, mid.x, mid.y);
                 }
             }
             break;
         }
         imgView.setImageMatrix(matrix);
-        //CheckView();
         return true;
     }
 
-    /**
-     * 限制最大最小缩放比例，自动居中
-     */
-    private void CheckView() {
-        float p[] = new float[9];
-        matrix.getValues(p);
-        if (mode == ZOOM) {
-            if (p[0] < minScaleR) {
-                matrix.setScale(minScaleR, minScaleR);
-                imgView.scale(rectWidth, rectHeight);
-                Log.d(TAG, "###  CheckView ZOOM = " + minScaleR + " dw = " + dw);
-            }
-            if (p[0] > MAX_SCALE) {
-            	imgView.scale(save_dw, save_dh);
-                matrix.set(savedMatrix);
-                Log.d(TAG, "###  CheckView MAX_SCALE = " + MAX_SCALE);
-            }
-        }
-        //Log.d(TAG, "### CheckView =" + p[0]);
-       // center();
-    }
 
     /**
      * 最小缩放比例，最大为100%
      */
     private void minZoom() {
-        //minScaleR = Math.min((float) dm.widthPixels / (float) bitmap.getWidth(), (float) dm.heightPixels / (float) bitmap.getHeight());
-    	minScaleR = (float) dm.widthPixels / (float) bitmap.getWidth();
+        minScaleR = Math.max((float) dm.widthPixels / (float) bitmap.getWidth(), (float) dm.heightPixels / (float) bitmap.getHeight());
         Log.d(TAG, "### minScaleR = " + minScaleR);
         if (minScaleR < 1.0) {
             matrix.postScale(minScaleR, minScaleR);
@@ -230,16 +195,6 @@ public class DrawView extends Activity implements OnTouchListener {
                 deltaX = screenWidth - rect.right;
             }
         }
-        Log.d(TAG, "### deltaX = "+ deltaX + " delayY = " + deltaY + " lastX = " + lastX + " lastY = " + lastY  + " x = " + x +  " y = "+ y);
-        if(deltaX == 0f && deltaY == 0f) {
-        	//imgView.setXY((int)-deltaX, (int)-deltaY);
-        	//imgView.setXY(lastX - x, lastY - y);
-        }/*else{
-        	imgView.setXY(-x + lastX, -y + lastY);
-        }*/
-        /*if(!dragFlag) {
-        	imgView.setXY((int)-deltaX, (int)-deltaY);
-        }*/
         matrix.postTranslate(deltaX, deltaY);
     }
 

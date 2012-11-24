@@ -15,7 +15,6 @@
         <activity
             android:name=".DrawView"
             android:label="@string/title_activity_draw_view"
-            android:screenOrientation="landscape"
             android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
