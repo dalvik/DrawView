@@ -2,7 +2,7 @@ package com.example.drawview;
 
 import android.graphics.Paint;
 
-public class ViewPath {
+public class MyViewPath {
 
 	
 	public int startX;
@@ -15,7 +15,7 @@ public class ViewPath {
 	
 	public Paint paint;
 	
-	public ViewPath(int startX, int startY,int stopX, int stopY, Paint paint) {
+	public MyViewPath(int startX, int startY,int stopX, int stopY, Paint paint) {
 		this.paint = paint;
 		this.startX = startX;
 		this.startY = startY;

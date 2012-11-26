@@ -2,8 +2,9 @@ package com.example.drawview;
 
 import android.graphics.Bitmap;
 import android.graphics.Paint;
+import android.graphics.Rect;
 
-public class MyView  {
+public class MyViewPoint  {
 
 	public Paint paint = null;
 	
@@ -17,7 +18,9 @@ public class MyView  {
 	
 	public Bitmap bitmap;
 	
-	public MyView(Paint paint, int left, int top, int width, int height, Bitmap bitmap) {
+	public Rect rect;
+	
+	public MyViewPoint(Paint paint, int left, int top, int width, int height, Bitmap bitmap) {
 		this.paint = paint;
 		this.left = left;
 		this.top = top;
@@ -27,6 +30,10 @@ public class MyView  {
 	}
 	
 	
-
+	public MyViewPoint(Paint paint, Rect rect, Bitmap bitmap) {
+        this.paint = paint;
+        this.rect = rect;
+        this.bitmap = bitmap;
+    }
 	
 }

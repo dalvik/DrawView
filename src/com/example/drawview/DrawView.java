@@ -2,6 +2,7 @@ package com.example.drawview;
 
 import android.app.Activity;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
@@ -37,28 +38,13 @@ public class DrawView extends Activity implements OnTouchListener {
     PointF mid = new PointF();
     float dist = 1f;
 
-    private int bw = 50;
+    private static final int bw = 50;
     
-    private int bh = 50;
-    
-    private int save_dw = 0;
-    
-    private int save_dh = 0;
-    
-    private int x = 0;
-    
-    private int y = 0;
-    
-    private float lastX = 0;
-    
-    private float lastY = 0;
+    private static final int bh = 50;
     
     private Paint MyVewPaint = new Paint();
+    
     private String TAG = "Touch";
-    
-    private float cx = 0;
-    
-    private float cy = 0;
     
     private float realImageWidth = 0;
     
@@ -70,42 +56,38 @@ public class DrawView extends Activity implements OnTouchListener {
     
     private boolean clickFlag = false;
     
+    private Bitmap lableBitmap;
+    
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.layout_draw_view);
-
+        lableBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher);
 		MyVewPaint.setColor(Color.RED);
-        imgView = (BackGroundVeiw) findViewById(R.id.imag);// 获取控件
+		MyVewPaint.setAntiAlias(true);
+		MyVewPaint.setStrokeWidth(2);
+        imgView = (BackGroundVeiw) findViewById(R.id.imag);
         bitmap = imgView.getBitmap();
         initImageWidth = bitmap.getWidth();
         initImageHeight = bitmap.getHeight();
-        imgView.setImageBitmap(bitmap);// 填充控件
+        imgView.setImageBitmap(bitmap);
         
-        imgView.setOnTouchListener(this);// 设置触屏监听
+        imgView.setOnTouchListener(this);
         dm = new DisplayMetrics();
-        getWindowManager().getDefaultDisplay().getMetrics(dm);// 获取分辨率
+        getWindowManager().getDefaultDisplay().getMetrics(dm);
         minZoom();
         center();
         imgView.setImageMatrix(matrix);
     }
 
-    /**
-     * 触屏监听
-     */
     public boolean onTouch(View v, MotionEvent event) {
 
         switch (event.getAction() & MotionEvent.ACTION_MASK) {
-        // 主点按下
         case MotionEvent.ACTION_DOWN:
             savedMatrix.set(matrix);
             prev.set(event.getX(), event.getY());
             mode = DRAG;
             clickFlag = true;
-            save_dw = bw;
-            save_dh = bh;
-            x = 0;
-            y = 0;
             break;
         case MotionEvent.ACTION_POINTER_DOWN:
             dist = spacing(event);
@@ -124,14 +106,15 @@ public class DrawView extends Activity implements OnTouchListener {
                 m.set(matrix);
                 RectF rectF = new RectF(0, 0, bitmap.getWidth(), bitmap.getHeight());
                 m.mapRect(rectF);
-                System.out.println(rectF.left);
-        		int left = (int) (initImageWidth/realImageWidth * (event.getX() - rectF.left)) - 25;
-        		int top = (int) (initImageHeight/realImagHeight * (event.getY() - rectF.top)) - 25;
-        		int right = left + 25;
-        		int bottom = top + 25;
+        		int left = (int) (initImageWidth/realImageWidth * (event.getX() - rectF.left)) - bw/2;
+        		int top = (int) (initImageHeight/realImagHeight * (event.getY() - rectF.top)) - bh/2;
+        		int right = left + bw/2;
+        		int bottom = top + bh/2;
         		Rect rect = new Rect(left, top, right, bottom);
-                bitmap = imgView.createBitmap(bitmap, savedMatrix, (int)realImageWidth, (int)realImagHeight, rect);
-                imgView.setImageBitmap(bitmap);// 填充控件
+        		MyViewPath viewPath = new MyViewPath(left+bw/4, top + bh/4, 0, 0, MyVewPaint);
+        		MyViewPoint myView = new MyViewPoint(MyVewPaint, rect, lableBitmap);
+                bitmap = imgView.createBitmap(bitmap, savedMatrix, (int)realImageWidth, (int)realImagHeight, myView, viewPath);
+                imgView.setImageBitmap(bitmap);
             }
             mode = NONE;
             break;
@@ -159,9 +142,6 @@ public class DrawView extends Activity implements OnTouchListener {
         return true;
     }
 
-    /**
-     * 横向、纵向居中
-     */
     protected void center(boolean horizontal, boolean vertical) {
 
         Matrix m = new Matrix();
@@ -170,16 +150,9 @@ public class DrawView extends Activity implements OnTouchListener {
         m.mapRect(rect);
         float height = rect.height();
         float width = rect.width();
-        lastX = width - cx;
-        lastY = height - cy;
-        
-        //cx = width;
-       // cy = height;
-        Log.d(TAG, "lastX= " + lastX + " lastY=" + lastY);
         float deltaX = 0, deltaY = 0;
 
         if (vertical) {
-            // 图片小于屏幕大小，则居中显示。大于屏幕，上方留空则往上移，下方留空则往下移
             int screenHeight = dm.heightPixels;
             if (height <= screenHeight) {
                 deltaY = (screenHeight - height) / 2 - rect.top;
@@ -200,8 +173,6 @@ public class DrawView extends Activity implements OnTouchListener {
                 deltaX = screenWidth - rect.right;
             }
         }
-        //Log.d(TAG, "mode = "+ mode + " top = " + rect.top + " left = " + rect.left + " right=" + rect.right  +  " bottom="+ rect.bottom);
-        // Log.d(TAG, "width= " + width + " height=" + height  + " screenWidth = " + dm.widthPixels + " screenHeight=" + dm.heightPixels);
         Log.d(TAG, "deltaX= " + deltaX + " deltaY=" + deltaY);
         matrix.postTranslate(deltaX, deltaY);
     }
@@ -223,9 +194,6 @@ public class DrawView extends Activity implements OnTouchListener {
         center();
     }
     
-    /**
-     * 最小缩放比例，最大为100%
-     */
     private void minZoom() {
         minScaleR = Math.max((float) dm.widthPixels / (float) bitmap.getWidth(), (float) dm.heightPixels / (float) bitmap.getHeight());
         curScaleR = minScaleR;
@@ -242,18 +210,12 @@ public class DrawView extends Activity implements OnTouchListener {
     }
 
     
-    /**
-     * 两点的距离
-     */
     private float spacing(MotionEvent event) {
         float x = event.getX(0) - event.getX(1);
         float y = event.getY(0) - event.getY(1);
         return FloatMath.sqrt(x * x + y * y);
     }
 
-    /**
-     * 两点的中点
-     */
     private void midPoint(PointF point, MotionEvent event) {
         float x = event.getX(0) + event.getX(1);
         float y = event.getY(0) + event.getY(1);
