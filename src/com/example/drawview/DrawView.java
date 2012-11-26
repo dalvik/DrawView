@@ -49,9 +49,9 @@ public class DrawView extends Activity implements OnTouchListener {
     
     private int y = 0;
     
-    private int lastX = 0;
+    private float lastX = 0;
     
-    private int lastY = 0;
+    private float lastY = 0;
     
     private Paint MyVewPaint = new Paint();
     private String TAG = "Touch";
@@ -59,6 +59,14 @@ public class DrawView extends Activity implements OnTouchListener {
     private float cx = 0;
     
     private float cy = 0;
+    
+    private float realImageWidth = 0;
+    
+    private float realImagHeight = 0;
+    
+    private float initImageWidth = 0;
+    
+    private float initImageHeight = 0;
     
     private boolean clickFlag = false;
     
@@ -70,6 +78,8 @@ public class DrawView extends Activity implements OnTouchListener {
 		MyVewPaint.setColor(Color.RED);
         imgView = (BackGroundVeiw) findViewById(R.id.imag);// »ñÈ¡¿Ø¼þ
         bitmap = imgView.getBitmap();
+        initImageWidth = bitmap.getWidth();
+        initImageHeight = bitmap.getHeight();
         imgView.setImageBitmap(bitmap);// Ìî³ä¿Ø¼þ
         
         imgView.setOnTouchListener(this);// ÉèÖÃ´¥ÆÁ¼àÌý
@@ -96,16 +106,12 @@ public class DrawView extends Activity implements OnTouchListener {
             save_dh = bh;
             x = 0;
             y = 0;
-            lastX = imgView.getX();
-            lastY = imgView.getY();
             break;
         case MotionEvent.ACTION_POINTER_DOWN:
             dist = spacing(event);
             clickFlag = false;
             if (spacing(event) > 10f) {
                 savedMatrix.set(matrix);
-                save_dw = bw;
-                save_dh = bh;
                 midPoint(mid, event);
                 mode = ZOOM;
             }
@@ -114,16 +120,17 @@ public class DrawView extends Activity implements OnTouchListener {
         case MotionEvent.ACTION_POINTER_UP:
         	if(clickFlag) {
         		clickFlag = false;
-        		//Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher);
-            	//MyView myView = new MyView(MyVewPaint, (int)(event.getX()- bw/2), (int)(event.getY() - bh/2) , bw,  bh, bitmap);
-            	//imgView.addPoint(myView);
-        		System.out.println(event);
-        		int left = (int) ((bitmap.getWidth()/cx)* event.getX());
-        		int top = (int) ((bitmap.getHeight()/cy)* event.getY());
-        		int right = left + 50;
-        		int bottom = top + 50;
+        		Matrix m = new Matrix();
+                m.set(matrix);
+                RectF rectF = new RectF(0, 0, bitmap.getWidth(), bitmap.getHeight());
+                m.mapRect(rectF);
+                System.out.println(rectF.left);
+        		int left = (int) (initImageWidth/realImageWidth * (event.getX() - rectF.left)) - 25;
+        		int top = (int) (initImageHeight/realImagHeight * (event.getY() - rectF.top)) - 25;
+        		int right = left + 25;
+        		int bottom = top + 25;
         		Rect rect = new Rect(left, top, right, bottom);
-                bitmap = imgView.createBitmap(bitmap, savedMatrix, (int)bitmap.getWidth(), (int)bitmap.getHeight(), rect);
+                bitmap = imgView.createBitmap(bitmap, savedMatrix, (int)realImageWidth, (int)realImagHeight, rect);
                 imgView.setImageBitmap(bitmap);// Ìî³ä¿Ø¼þ
             }
             mode = NONE;
@@ -142,9 +149,6 @@ public class DrawView extends Activity implements OnTouchListener {
                 if (newDist > 10f) {
                     matrix.set(savedMatrix);
                     float tScale = newDist / dist;
-                    bw = (int)(tScale* save_dw);
-                    bh = (int)(tScale *save_dh);
-                    imgView.scale(bw, bh,mid.x, mid.y);
                     matrix.postScale(tScale, tScale, mid.x, mid.y);
                 }
             }
@@ -164,12 +168,14 @@ public class DrawView extends Activity implements OnTouchListener {
         m.set(matrix);
         RectF rect = new RectF(0, 0, bitmap.getWidth(), bitmap.getHeight());
         m.mapRect(rect);
-        System.out.println("cx=" +cx);
         float height = rect.height();
         float width = rect.width();
-        cx = width;
-        cy = height;
-        Log.d(TAG, "width= " + width + " height=" + height);
+        lastX = width - cx;
+        lastY = height - cy;
+        
+        //cx = width;
+       // cy = height;
+        Log.d(TAG, "lastX= " + lastX + " lastY=" + lastY);
         float deltaX = 0, deltaY = 0;
 
         if (vertical) {
@@ -194,9 +200,6 @@ public class DrawView extends Activity implements OnTouchListener {
                 deltaX = screenWidth - rect.right;
             }
         }
-        if (width > dm.widthPixels || height>dm.heightPixels) {
-        	imgView.setXY(x + lastX, y + lastY);
-        }
         //Log.d(TAG, "mode = "+ mode + " top = " + rect.top + " left = " + rect.left + " right=" + rect.right  +  " bottom="+ rect.bottom);
         // Log.d(TAG, "width= " + width + " height=" + height  + " screenWidth = " + dm.widthPixels + " screenHeight=" + dm.heightPixels);
         Log.d(TAG, "deltaX= " + deltaX + " deltaY=" + deltaY);
@@ -207,16 +210,14 @@ public class DrawView extends Activity implements OnTouchListener {
         float p[] = new float[9];
         matrix.getValues(p);
         curScaleR = p[0];
+        realImageWidth = curScaleR * bitmap.getWidth();
+        realImagHeight = curScaleR * bitmap.getHeight();
         if (mode == ZOOM) {
             if (curScaleR < minScaleR) {
                 matrix.setScale(minScaleR, minScaleR);
-                imgView.scale(bw, bh,mid.x, mid.y);
-                //Log.d(TAG, "###  CheckView ZOOM = " + minScaleR + " dw = " + bw);
             }
             if (curScaleR > MAX_SCALE) {
-            	imgView.scale(save_dw, save_dh,mid.x, mid.y);
                 matrix.set(savedMatrix);
-                //Log.d(TAG, "###  CheckView MAX_SCALE = " + MAX_SCALE);
             }
         }
         center();
@@ -227,9 +228,12 @@ public class DrawView extends Activity implements OnTouchListener {
      */
     private void minZoom() {
         minScaleR = Math.max((float) dm.widthPixels / (float) bitmap.getWidth(), (float) dm.heightPixels / (float) bitmap.getHeight());
+        curScaleR = minScaleR;
         MAX_SCALE = Math.max((float) bitmap.getWidth() / (float) dm.widthPixels, (float) bitmap.getHeight() / (float) dm.heightPixels);;
         if (minScaleR < 1.0) {
             matrix.postScale(minScaleR, minScaleR);
+            realImageWidth = minScaleR * bitmap.getWidth();
+            realImagHeight = minScaleR * bitmap.getHeight();
         }
     }
 

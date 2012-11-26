@@ -68,7 +68,7 @@ public class BackGroundVeiw extends ImageView {
 
 	private void initGesture() {
 		//bg = BitmapFactory.decodeResource(getResources(), R.drawable.bg);
-		bg = BitmapFactory.decodeResource(getResources(), R.drawable._birds_24);
+		bg = BitmapFactory.decodeResource(getResources(), R.drawable._birds_24).copy(Config.RGB_565, true);
 		paint = new Paint();
 		paint.setColor(color.white);
 		viewPathPaint.setColor(Color.BLUE);
