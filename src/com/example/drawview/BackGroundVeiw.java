@@ -1,11 +1,16 @@
 package com.example.drawview;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
 import android.R.color;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.CompressFormat;
+import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -13,6 +18,7 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.util.AttributeSet;
+import android.view.MotionEvent;
 import android.widget.ImageView;
 
 public class BackGroundVeiw extends ImageView {
@@ -71,7 +77,7 @@ public class BackGroundVeiw extends ImageView {
 	@Override
 	protected void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
-		int length = pointList.size();
+		/*int length = pointList.size();
 		for(int i=0; i<length; i++) {
 			MyView myView = pointList.get(i);
 			int left = dx + myView.left;
@@ -91,7 +97,7 @@ public class BackGroundVeiw extends ImageView {
 		for(int i=0; i<pathLength; i++) {
 			ViewPath  viewPath = pathList.get(i);
 			canvas.drawLine(dx + viewPath.startX, dy + viewPath.startY, dx + viewPath.stopX, dy + viewPath.stopY, viewPath.paint);
-		}
+		}*/
 		
 	}
 	
@@ -154,4 +160,20 @@ public class BackGroundVeiw extends ImageView {
 		return dy;
 	}
 	
+	public Bitmap  createBitmap(Bitmap b, Matrix matrix, int w, int h,MotionEvent event) {
+		//Bitmap bitmap = Bitmap.createBitmap(w, h, Config.RGB_565);
+		Canvas canvas = new Canvas(b);
+		//canvas.drawBitmap(b, matrix, paint);
+		canvas.drawRect(new Rect((int)event.getX(), (int)event.getY(), (int)(event.getX()-50), (int)(event.getY()-50)),viewPathPaint);
+		/*try {
+			FileOutputStream fos = new FileOutputStream(new File("/mnt/sdcard/abc.jpg"));
+			b.compress(CompressFormat.JPEG, 90, fos);
+			fos.flush();
+			fos.close();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}*/
+		return b;
+	}
 }

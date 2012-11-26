@@ -2,8 +2,6 @@ package com.example.drawview;
 
 import android.app.Activity;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
@@ -112,9 +110,12 @@ public class DrawView extends Activity implements OnTouchListener {
         case MotionEvent.ACTION_POINTER_UP:
         	if(clickFlag) {
         		clickFlag = false;
-        		Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher);
-            	MyView myView = new MyView(MyVewPaint, (int)(event.getX()- bw/2), (int)(event.getY() - bh/2) , bw,  bh, bitmap);
-            	imgView.addPoint(myView);
+        		//Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher);
+            	//MyView myView = new MyView(MyVewPaint, (int)(event.getX()- bw/2), (int)(event.getY() - bh/2) , bw,  bh, bitmap);
+            	//imgView.addPoint(myView);
+        		System.out.println(event);
+                bitmap = imgView.createBitmap(bitmap,savedMatrix, (int)bitmap.getWidth(), (int)bitmap.getWidth(), event);
+                imgView.setImageBitmap(bitmap);// МоідїШјю
             }
             mode = NONE;
             break;
@@ -125,20 +126,6 @@ public class DrawView extends Activity implements OnTouchListener {
                 if(Math.abs(dx)>5f){
                 	clickFlag = false;
                 	float dy = event.getY() - prev.y;
-            		x = (int) dx;
-            		y = (int) dy;
-            		Matrix m = new Matrix();
-        	        m.set(matrix);
-        	        RectF rect = new RectF(0, 0, bitmap.getWidth(), bitmap.getHeight());
-        	        m.mapRect(rect);
-
-        	        float height = rect.height();
-        	        float width = rect.width();
-        	        int screenHeight = dm.heightPixels;
-        	        Log.d(TAG, "=======width= " + width + " height=" + height);
-                    /*if (height > screenHeight) {
-                    	imgView.setXY(x + lastX, y + lastY);
-                    }*/
                 	matrix.postTranslate(dx, dy);
                 }
             } else if (mode == ZOOM) {
