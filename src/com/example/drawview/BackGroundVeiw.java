@@ -45,6 +45,8 @@ public class BackGroundVeiw extends ImageView {
 	
 	Matrix matrix = new Matrix();
 	
+	private Canvas canvas = null;
+	
 	public BackGroundVeiw(Context context) {
 		super(context);
 		this.context = context;
@@ -77,6 +79,7 @@ public class BackGroundVeiw extends ImageView {
 	@Override
 	protected void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
+		this.canvas = canvas;
 		/*int length = pointList.size();
 		for(int i=0; i<length; i++) {
 			MyView myView = pointList.get(i);
@@ -160,20 +163,11 @@ public class BackGroundVeiw extends ImageView {
 		return dy;
 	}
 	
-	public Bitmap  createBitmap(Bitmap b, Matrix matrix, int w, int h,MotionEvent event) {
+	public Bitmap  createBitmap(Bitmap bitmap, Matrix matrix, int w, int h,Rect rect) {
 		//Bitmap bitmap = Bitmap.createBitmap(w, h, Config.RGB_565);
-		Canvas canvas = new Canvas(b);
-		//canvas.drawBitmap(b, matrix, paint);
-		canvas.drawRect(new Rect((int)event.getX(), (int)event.getY(), (int)(event.getX()-50), (int)(event.getY()-50)),viewPathPaint);
-		/*try {
-			FileOutputStream fos = new FileOutputStream(new File("/mnt/sdcard/abc.jpg"));
-			b.compress(CompressFormat.JPEG, 90, fos);
-			fos.flush();
-			fos.close();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}*/
-		return b;
+		Canvas canvas = new Canvas(bitmap);
+		canvas.drawBitmap(bitmap, matrix, paint);
+		canvas.drawRect(rect, viewPathPaint);
+		return bitmap;
 	}
 }

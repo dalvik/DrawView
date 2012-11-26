@@ -6,6 +6,7 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PointF;
+import android.graphics.Rect;
 import android.graphics.RectF;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
@@ -55,6 +56,9 @@ public class DrawView extends Activity implements OnTouchListener {
     private Paint MyVewPaint = new Paint();
     private String TAG = "Touch";
     
+    private float cx = 0;
+    
+    private float cy = 0;
     
     private boolean clickFlag = false;
     
@@ -114,7 +118,12 @@ public class DrawView extends Activity implements OnTouchListener {
             	//MyView myView = new MyView(MyVewPaint, (int)(event.getX()- bw/2), (int)(event.getY() - bh/2) , bw,  bh, bitmap);
             	//imgView.addPoint(myView);
         		System.out.println(event);
-                bitmap = imgView.createBitmap(bitmap,savedMatrix, (int)bitmap.getWidth(), (int)bitmap.getWidth(), event);
+        		int left = (int) ((bitmap.getWidth()/cx)* event.getX());
+        		int top = (int) ((bitmap.getHeight()/cy)* event.getY());
+        		int right = left + 50;
+        		int bottom = top + 50;
+        		Rect rect = new Rect(left, top, right, bottom);
+                bitmap = imgView.createBitmap(bitmap, savedMatrix, (int)bitmap.getWidth(), (int)bitmap.getHeight(), rect);
                 imgView.setImageBitmap(bitmap);// МоідїШјю
             }
             mode = NONE;
@@ -155,9 +164,11 @@ public class DrawView extends Activity implements OnTouchListener {
         m.set(matrix);
         RectF rect = new RectF(0, 0, bitmap.getWidth(), bitmap.getHeight());
         m.mapRect(rect);
-
+        System.out.println("cx=" +cx);
         float height = rect.height();
         float width = rect.width();
+        cx = width;
+        cy = height;
         Log.d(TAG, "width= " + width + " height=" + height);
         float deltaX = 0, deltaY = 0;
 
