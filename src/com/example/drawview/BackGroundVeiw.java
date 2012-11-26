@@ -6,10 +6,10 @@ import java.util.List;
 import android.R.color;
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.util.AttributeSet;
@@ -37,6 +37,8 @@ public class BackGroundVeiw extends ImageView {
 	
 	private int dy = 0;
 	
+	Matrix matrix = new Matrix();
+	
 	public BackGroundVeiw(Context context) {
 		super(context);
 		this.context = context;
@@ -57,8 +59,8 @@ public class BackGroundVeiw extends ImageView {
 
 
 	private void initGesture() {
-		bg = BitmapFactory.decodeResource(getResources(), R.drawable.bg);
-		//bg = BitmapFactory.decodeResource(getResources(), R.drawable._birds_24);
+		//bg = BitmapFactory.decodeResource(getResources(), R.drawable.bg);
+		bg = BitmapFactory.decodeResource(getResources(), R.drawable._birds_24);
 		paint = new Paint();
 		paint.setColor(color.white);
 		viewPathPaint.setColor(Color.BLUE);
@@ -90,6 +92,7 @@ public class BackGroundVeiw extends ImageView {
 			ViewPath  viewPath = pathList.get(i);
 			canvas.drawLine(dx + viewPath.startX, dy + viewPath.startY, dx + viewPath.stopX, dy + viewPath.stopY, viewPath.paint);
 		}
+		
 	}
 	
 	public Bitmap getBitmap() {
@@ -118,7 +121,7 @@ public class BackGroundVeiw extends ImageView {
 		invalidate();
 	}
 	
-	public void scale(int dw, int dh) {
+	public void scale(int dw, int dh, float px, float py) {
 		int length = pointList.size();
 		pathList.clear();
 		for(int i=0;i<length;i++) {
@@ -150,4 +153,5 @@ public class BackGroundVeiw extends ImageView {
 	public int getY() {
 		return dy;
 	}
+	
 }

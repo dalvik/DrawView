@@ -3,6 +3,7 @@ package com.example.drawview;
 import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
@@ -25,7 +26,8 @@ public class DrawView extends Activity implements OnTouchListener {
     Bitmap bitmap;
 
     float minScaleR;// 最小缩放比例
-    static final float MAX_SCALE = 4f;// 最大缩放比例
+    float curScaleR = 0;
+    static float MAX_SCALE = 4f;// 最大缩放比例
 
     static final int NONE = 0;// 初始状态
     static final int DRAG = 1;// 拖动
@@ -54,6 +56,7 @@ public class DrawView extends Activity implements OnTouchListener {
     
     private Paint MyVewPaint = new Paint();
     private String TAG = "Touch";
+    
     
     private boolean clickFlag = false;
     
@@ -124,7 +127,18 @@ public class DrawView extends Activity implements OnTouchListener {
                 	float dy = event.getY() - prev.y;
             		x = (int) dx;
             		y = (int) dy;
-            		imgView.setXY(x + lastX, y + lastY);
+            		Matrix m = new Matrix();
+        	        m.set(matrix);
+        	        RectF rect = new RectF(0, 0, bitmap.getWidth(), bitmap.getHeight());
+        	        m.mapRect(rect);
+
+        	        float height = rect.height();
+        	        float width = rect.width();
+        	        int screenHeight = dm.heightPixels;
+        	        Log.d(TAG, "=======width= " + width + " height=" + height);
+                    /*if (height > screenHeight) {
+                    	imgView.setXY(x + lastX, y + lastY);
+                    }*/
                 	matrix.postTranslate(dx, dy);
                 }
             } else if (mode == ZOOM) {
@@ -134,30 +148,15 @@ public class DrawView extends Activity implements OnTouchListener {
                     float tScale = newDist / dist;
                     bw = (int)(tScale* save_dw);
                     bh = (int)(tScale *save_dh);
-                    imgView.scale(bw, bh);
+                    imgView.scale(bw, bh,mid.x, mid.y);
                     matrix.postScale(tScale, tScale, mid.x, mid.y);
                 }
             }
             break;
         }
         imgView.setImageMatrix(matrix);
+        CheckView();
         return true;
-    }
-
-
-    /**
-     * 最小缩放比例，最大为100%
-     */
-    private void minZoom() {
-        minScaleR = Math.max((float) dm.widthPixels / (float) bitmap.getWidth(), (float) dm.heightPixels / (float) bitmap.getHeight());
-        Log.d(TAG, "### minScaleR = " + minScaleR);
-        if (minScaleR < 1.0) {
-            matrix.postScale(minScaleR, minScaleR);
-        }
-    }
-
-    private void center() {
-        center(true, true);
     }
 
     /**
@@ -172,7 +171,7 @@ public class DrawView extends Activity implements OnTouchListener {
 
         float height = rect.height();
         float width = rect.width();
-
+        Log.d(TAG, "width= " + width + " height=" + height);
         float deltaX = 0, deltaY = 0;
 
         if (vertical) {
@@ -197,9 +196,50 @@ public class DrawView extends Activity implements OnTouchListener {
                 deltaX = screenWidth - rect.right;
             }
         }
+        if (width > dm.widthPixels || height>dm.heightPixels) {
+        	imgView.setXY(x + lastX, y + lastY);
+        }
+        //Log.d(TAG, "mode = "+ mode + " top = " + rect.top + " left = " + rect.left + " right=" + rect.right  +  " bottom="+ rect.bottom);
+        // Log.d(TAG, "width= " + width + " height=" + height  + " screenWidth = " + dm.widthPixels + " screenHeight=" + dm.heightPixels);
+        Log.d(TAG, "deltaX= " + deltaX + " deltaY=" + deltaY);
         matrix.postTranslate(deltaX, deltaY);
     }
 
+    private void CheckView() {
+        float p[] = new float[9];
+        matrix.getValues(p);
+        curScaleR = p[0];
+        if (mode == ZOOM) {
+            if (curScaleR < minScaleR) {
+                matrix.setScale(minScaleR, minScaleR);
+                imgView.scale(bw, bh,mid.x, mid.y);
+                //Log.d(TAG, "###  CheckView ZOOM = " + minScaleR + " dw = " + bw);
+            }
+            if (curScaleR > MAX_SCALE) {
+            	imgView.scale(save_dw, save_dh,mid.x, mid.y);
+                matrix.set(savedMatrix);
+                //Log.d(TAG, "###  CheckView MAX_SCALE = " + MAX_SCALE);
+            }
+        }
+        center();
+    }
+    
+    /**
+     * 最小缩放比例，最大为100%
+     */
+    private void minZoom() {
+        minScaleR = Math.max((float) dm.widthPixels / (float) bitmap.getWidth(), (float) dm.heightPixels / (float) bitmap.getHeight());
+        MAX_SCALE = Math.max((float) bitmap.getWidth() / (float) dm.widthPixels, (float) bitmap.getHeight() / (float) dm.heightPixels);;
+        if (minScaleR < 1.0) {
+            matrix.postScale(minScaleR, minScaleR);
+        }
+    }
+
+    private void center() {
+        center(true, true);
+    }
+
+    
     /**
      * 两点的距离
      */
