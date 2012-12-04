@@ -1,6 +1,8 @@
 package com.example.drawview;
 
 import android.app.Activity;
+import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -73,6 +75,11 @@ public class DrawView extends Activity implements OnTouchListener {
         bitmap = imgView.getBitmap();
         initImageWidth = bitmap.getWidth();
         initImageHeight = bitmap.getHeight();
+        if(initImageWidth>=initImageHeight) {
+        	setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        } else {
+        	setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        }
         imgView.setImageBitmap(bitmap);
         
         imgView.setOnTouchListener(this);
@@ -229,5 +236,10 @@ public class DrawView extends Activity implements OnTouchListener {
         float x = event.getX(0) + event.getX(1);
         float y = event.getY(0) + event.getY(1);
         point.set(x / 2, y / 2);
+    }
+    
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+    	super.onConfigurationChanged(newConfig);
     }
 }
