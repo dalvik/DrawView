@@ -16,6 +16,7 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
+import android.widget.Toast;
 
 public class DrawView extends Activity implements OnTouchListener {
 
@@ -58,10 +59,13 @@ public class DrawView extends Activity implements OnTouchListener {
     
     private Bitmap lableBitmap;
     
+    private PonitList list = null;
+    
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.layout_draw_view);
+        list = new PonitList();
         lableBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher);
 		MyVewPaint.setColor(Color.RED);
 		MyVewPaint.setAntiAlias(true);
@@ -108,13 +112,19 @@ public class DrawView extends Activity implements OnTouchListener {
                 m.mapRect(rectF);
         		int left = (int) (initImageWidth/realImageWidth * (event.getX() - rectF.left)) - bw/2;
         		int top = (int) (initImageHeight/realImagHeight * (event.getY() - rectF.top)) - bh/2;
-        		int right = left + bw/2;
-        		int bottom = top + bh/2;
-        		Rect rect = new Rect(left, top, right, bottom);
-        		MyViewPath viewPath = new MyViewPath(left+bw/4, top + bh/4, 0, 0, MyVewPaint);
-        		MyViewPoint myView = new MyViewPoint(MyVewPaint, rect, lableBitmap);
-                bitmap = imgView.createBitmap(bitmap, savedMatrix, (int)realImageWidth, (int)realImagHeight, myView, viewPath);
-                imgView.setImageBitmap(bitmap);
+        		int right = left + bw;
+        		int bottom = top + bh;
+        		if(!list.checkPoint(left+bw/2, top + bh/2)) {
+        			Rect rect = new Rect(left, top, right, bottom);
+        			list.add(rect);
+        			MyViewPath viewPath = new MyViewPath(left+bw/2, top + bh/2, 0, 0, MyVewPaint);
+        			MyViewPoint myView = new MyViewPoint(MyVewPaint, rect, lableBitmap);
+        			bitmap = imgView.createBitmap(bitmap, savedMatrix, (int)realImageWidth, (int)realImagHeight, myView, viewPath);
+        			imgView.setImageBitmap(bitmap);
+        		}else {
+        			//TODO
+        			Toast.makeText(this, "此处添加点击响应代码", 500).show();
+        		}
             }
             mode = NONE;
             break;
@@ -173,7 +183,7 @@ public class DrawView extends Activity implements OnTouchListener {
                 deltaX = screenWidth - rect.right;
             }
         }
-        Log.d(TAG, "deltaX= " + deltaX + " deltaY=" + deltaY);
+        //Log.d(TAG, "deltaX= " + deltaX + " deltaY=" + deltaY);
         matrix.postTranslate(deltaX, deltaY);
     }
 
