@@ -1,5 +1,8 @@
 package com.example.drawview;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import android.R.color;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -24,6 +27,8 @@ public class BackGroundVeiw extends ImageView {
 	
 	private MyViewPath  viewPath = null;
 	
+	private List<Rect> pathList = null;
+	
 	public BackGroundVeiw(Context context) {
 		super(context);
 		this.context = context;
@@ -47,6 +52,7 @@ public class BackGroundVeiw extends ImageView {
 		bg = BitmapFactory.decodeResource(getResources(), R.drawable.bg).copy(Config.RGB_565, true);
 		paint = new Paint();
 		paint.setColor(color.white);
+		pathList = new  ArrayList<Rect>();
 	}
 	
 	
@@ -68,9 +74,41 @@ public class BackGroundVeiw extends ImageView {
 		if(viewPath != null) {
 		    canvas.drawLine( viewPath.startX, viewPath.startY, newViewPath.startX,newViewPath.startY, viewPath.paint);
 		    viewPath = newViewPath;
+		    Rect r = new Rect(viewPath.startX,viewPath.startY, newViewPath.startX, newViewPath.startY);
+		    pathList.add(r);
 		}else {
 		    viewPath = newViewPath;
 		}
 		return bitmap;
+	}
+	
+	public boolean checkPath(int x, int y) {
+		for(Rect r:pathList) {
+			
+			int x1 = r.left;
+			int y1 = r.top - 5;
+			
+			int x2 = r.left;
+			int y2 = r.top + 5;
+			
+			int x3 = r.right;
+			int y3 = r.bottom - 5;
+			
+			int x4 = r.right;
+			int y4 = r.bottom + 5;
+			
+			int k1 = (y2-y1)/(x2-x1);
+			int k2 = (y3-y2)/(x3-x2);
+			int k3 = (y4-y3)/(x4-x3);
+			int k4 = (y1-y4)/(x1-x4);
+			
+			int t1 = (y-y1)/(x-x1);
+			int t2 = (y-y1)/(x-x1);
+			int t3 = (y-y1)/(x-x1);
+			int t4 = (y-y1)/(x-x1);
+			
+			
+		}
+		return false;
 	}
 }
