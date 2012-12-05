@@ -121,12 +121,16 @@ public class DrawView extends Activity implements OnTouchListener {
         		int right = left + bw;
         		int bottom = top + bh;
         		if(!list.checkPoint(left+bw/2, top + bh/2)) {
-        			Rect rect = new Rect(left, top, right, bottom);
-        			list.add(rect);
-        			MyViewPath viewPath = new MyViewPath(left+bw/2, top + bh/2, 0, 0, MyVewPaint);
-        			MyViewPoint myView = new MyViewPoint(MyVewPaint, rect, lableBitmap);
-        			bitmap = imgView.createBitmap(bitmap, savedMatrix, (int)realImageWidth, (int)realImagHeight, myView, viewPath);
-        			imgView.setImageBitmap(bitmap);
+        			if(!imgView.checkPath(left+bw/2, top + bh/2)) {
+        				Rect rect = new Rect(left, top, right, bottom);
+        				list.add(rect);
+        				MyViewPath viewPath = new MyViewPath(left+bw/2, top + bh/2, 0, 0, MyVewPaint);
+        				MyViewPoint myView = new MyViewPoint(MyVewPaint, rect, lableBitmap);
+        				bitmap = imgView.createBitmap(bitmap, savedMatrix, (int)realImageWidth, (int)realImagHeight, myView, viewPath);
+        				imgView.setImageBitmap(bitmap);
+        			} else {
+        				Toast.makeText(this, "此处添加点击响应代码", 500).show();
+        			}
         		}else {
         			//TODO
         			Toast.makeText(this, "此处添加点击响应代码", 500).show();

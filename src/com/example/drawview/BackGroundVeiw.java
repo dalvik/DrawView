@@ -83,31 +83,22 @@ public class BackGroundVeiw extends ImageView {
 	}
 	
 	public boolean checkPath(int x, int y) {
+		System.out.println(x + " ===== " + y);
 		for(Rect r:pathList) {
-			
+			System.out.println("###" + r);  
+			//if(x>r.left && x<r.right && y>r.top && y<r.bottom) {
 			int x1 = r.left;
-			int y1 = r.top - 5;
-			
-			int x2 = r.left;
-			int y2 = r.top + 5;
-			
-			int x3 = r.right;
-			int y3 = r.bottom - 5;
-			
-			int x4 = r.right;
-			int y4 = r.bottom + 5;
-			
-			int k1 = (y2-y1)/(x2-x1);
-			int k2 = (y3-y2)/(x3-x2);
-			int k3 = (y4-y3)/(x4-x3);
-			int k4 = (y1-y4)/(x1-x4);
-			
-			int t1 = (y-y1)/(x-x1);
-			int t2 = (y-y1)/(x-x1);
-			int t3 = (y-y1)/(x-x1);
-			int t4 = (y-y1)/(x-x1);
-			
-			
+			int y1 = r.top;
+			int x2 = r.right;
+			int y2 = r.bottom;
+			System.out.println("x1 = " + x1 + " x2 = " + x2  + " y1 = " + y1 + " y2 = " + y2);
+			if(x>x1 && x<x2 && y>y1 && y<y2) {
+				double d = (Math.abs((y2 - y1) * x +(x1 - x2) * y + ((x2 * y1) -(x1 * y2)))) / (Math.sqrt(Math.pow(y2 - y1, 2) + Math.pow(x1 - x2, 2)));
+				System.out.println("dd = " + d);
+				if(d<=5f) {
+					return true;
+				}
+			}
 		}
 		return false;
 	}
